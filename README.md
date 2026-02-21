@@ -1,4 +1,4 @@
-# 🎮 MarketMind - AI Trading Arena
+# 🎮 AlgoArena - AI Trading Arena
 
 **A real-time stock market simulation game where you compete against AI-powered trading agents**
 
@@ -11,7 +11,7 @@
 
 ## 🚀 What Is This?
 
-MarketMind is an AI-powered stock market simulation game where AI agents from major institutions trade in real-time. Experience the **Indian Market** (NIFTY 50, Bank NIFTY) like never before with a bento-style dashboard, sparkles, and a vibe-checked Gen Z interface.
+AlgoArena is an AI-powered stock market simulation game where AI agents from major institutions trade in real-time. Experience the **Indian Market** (NIFTY 50, Bank NIFTY) like never before with a bento-style dashboard, sparkles, and a vibe-checked Gen Z interface.
 
 ### ✨ Key Features
 
@@ -58,7 +58,7 @@ MarketMind is an AI-powered stock market simulation game where AI agents from ma
 |------------|---------|
 | **FastAPI** | High-performance async web framework |
 | **WebSockets** | Real-time bidirectional communication |
-| **OpenRouter API** | LLM access for trading agents (Gemini 3.0 Flash) |
+| **OpenRouter API** | LLM access for trading agents (Gemini 2.0 Flash) |
 | **Google GenAI** | Gemini API for chat assistant |
 | **Uvicorn** | ASGI server |
 
@@ -130,7 +130,7 @@ Just open the URL in your browser — no setup required!
 
 ## 📊 How the Simulation Works
 
-> **Project Demo** Check out our project (demo video included) on [Devpost](https://devpost.com/software/marketmind-vlobg1)!
+> **Project Demo** Check out our project (demo video included) on [Devpost](https://devpost.com/software/algoarena)!
 
 1. **Market Opens** - 500 S&P stocks loaded with 12-month price history
 2. **Each Tick (Day)**:
