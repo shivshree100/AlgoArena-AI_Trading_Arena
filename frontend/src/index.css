@@ -1,0 +1,339 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* New color scheme: #254F22 (dark green), #A03A13 (rust), #F5824A (orange), #EDE4C2 (cream) */
+    --background: 40 25% 92%; /* Cream background */
+    --foreground: 120 30% 15%; /* Dark green text */
+
+    --card: 40 30% 96%; /* Light cream card */
+    --card-foreground: 120 30% 15%;
+
+    --popover: 40 30% 96%;
+    --popover-foreground: 120 30% 15%;
+
+    --primary: 15 80% 48%; /* Rust/orange primary */
+    --primary-foreground: 40 25% 95%;
+
+    --secondary: 40 20% 88%;
+    --secondary-foreground: 120 30% 15%;
+
+    --muted: 40 15% 85%;
+    --muted-foreground: 120 15% 40%;
+
+    --accent: 25 75% 60%; /* Orange accent */
+    --accent-foreground: 120 30% 15%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 40 20% 80%;
+    --input: 40 20% 80%;
+    --ring: 15 80% 48%;
+
+    --radius: 0.75rem;
+
+    /* Trading colors - GREEN for profit, RED for loss */
+    --gain: 120 60% 35%; /* Green for profit */
+    --loss: 0 70% 50%; /* Red for loss */
+    --gain-muted: 120 40% 90%;
+    --loss-muted: 0 40% 90%;
+
+    /* Trader type colors — new palette */
+    --trader-institutional: 15 70% 45%;
+    --trader-retail: 25 65% 55%;
+    --trader-quant: 120 50% 35%;
+    --trader-hft: 35 70% 50%;
+    --trader-custom: 15 80% 48%;
+
+    /* Glass effect */
+    --glass: 40 25% 94%;
+    --glass-border: 40 20% 82%;
+
+    /* Chart colors — new theme */
+    --chart-candle-up: 120 60% 35%; /* Green for up */
+    --chart-candle-down: 0 70% 50%; /* Red for down */
+    --chart-volume: 25 50% 60%;
+    --chart-grid: 40 15% 88%;
+  }
+
+  .dark {
+    --background: 40 25% 92%;
+    --foreground: 120 30% 15%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    background:
+      radial-gradient(ellipse at 20% 0%, hsl(25, 40%, 88%, 0.5) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, hsl(40, 30%, 90%, 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, hsl(35, 35%, 92%, 0.3) 0%, transparent 60%),
+      hsl(var(--background));
+    background-attachment: fixed;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply backdrop-blur-xl rounded-xl;
+    background: linear-gradient(135deg,
+        hsl(40, 25%, 97%, 0.92) 0%,
+        hsl(40, 30%, 95%, 0.88) 100%);
+    border: 1px solid hsl(40, 25%, 85%, 0.6);
+    box-shadow:
+      0 4px 24px hsl(40, 20%, 70%, 0.2),
+      inset 0 1px 0 hsl(40, 30%, 98%, 0.5);
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300;
+  }
+
+  .glass-card-hover:hover {
+    border-color: hsl(var(--primary) / 0.5);
+    box-shadow:
+      0 4px 24px hsl(40, 20%, 70%, 0.3),
+      0 0 25px hsl(var(--primary) / 0.15),
+      inset 0 1px 0 hsl(40, 30%, 98%, 0.6);
+  }
+
+  /* Gradient header — new colors */
+  .gradient-header {
+    background: linear-gradient(135deg,
+        hsl(40, 30%, 96%, 0.9) 0%,
+        hsl(40, 25%, 94%, 0.95) 40%,
+        hsl(35, 28%, 95%, 0.9) 100%);
+    border-bottom: 1px solid hsl(40, 25%, 85%, 0.6);
+    backdrop-filter: blur(20px);
+  }
+
+  /* Gradient accent backgrounds */
+  .gradient-accent {
+    background: linear-gradient(135deg,
+        hsl(25, 35%, 92%, 0.4) 0%,
+        hsl(40, 25%, 94%, 0.2) 50%,
+        hsl(35, 30%, 93%, 0.3) 100%);
+  }
+
+  .gradient-card {
+    background: linear-gradient(145deg,
+        hsl(25, 30%, 94%, 0.5) 0%,
+        hsl(40, 25%, 96%, 0.9) 30%,
+        hsl(40, 25%, 96%, 0.9) 70%,
+        hsl(35, 25%, 94%, 0.5) 100%);
+    border: 1px solid hsl(40, 25%, 85%, 0.6);
+  }
+
+  .text-gain {
+    @apply text-[hsl(var(--gain))];
+  }
+
+  .text-loss {
+    @apply text-[hsl(var(--loss))];
+  }
+
+  .bg-gain {
+    @apply bg-[hsl(var(--gain))];
+  }
+
+  .bg-loss {
+    @apply bg-[hsl(var(--loss))];
+  }
+
+  .bg-gain-muted {
+    @apply bg-[hsl(var(--gain-muted))];
+  }
+
+  .bg-loss-muted {
+    @apply bg-[hsl(var(--loss-muted))];
+  }
+
+  .trader-institutional {
+    @apply text-[hsl(var(--trader-institutional))];
+  }
+
+  .trader-retail {
+    @apply text-[hsl(var(--trader-retail))];
+  }
+
+  .trader-quant {
+    @apply text-[hsl(var(--trader-quant))];
+  }
+
+  .trader-hft {
+    @apply text-[hsl(var(--trader-hft))];
+  }
+
+  .trader-custom {
+    @apply text-[hsl(var(--trader-custom))];
+  }
+
+  .glow-gain {
+    box-shadow: 0 0 20px hsl(var(--gain) / 0.3), 0 0 40px hsl(var(--gain) / 0.1);
+  }
+
+  .glow-loss {
+    box-shadow: 0 0 20px hsl(var(--loss) / 0.3), 0 0 40px hsl(var(--loss) / 0.1);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 25px hsl(var(--primary) / 0.25), 0 0 50px hsl(var(--primary) / 0.1);
+  }
+
+  /* Global subtle glow on all buttons */
+  button,
+  [role="button"],
+  .btn {
+    transition: box-shadow 0.35s ease, transform 0.2s ease, filter 0.35s ease;
+  }
+
+  button:hover,
+  [role="button"]:hover,
+  .btn:hover {
+    box-shadow:
+      0 0 12px hsl(15, 70%, 50%, 0.25),
+      0 0 24px hsl(15, 60%, 48%, 0.15);
+    filter: brightness(1.08);
+  }
+
+  button:active,
+  [role="button"]:active,
+  .btn:active {
+    box-shadow:
+      0 0 8px hsl(15, 70%, 50%, 0.2),
+      0 0 16px hsl(15, 60%, 48%, 0.1);
+    filter: brightness(0.97);
+  }
+
+  .animate-value-up {
+    animation: valueUp 0.4s ease-out;
+  }
+
+  .animate-value-down {
+    animation: valueDown 0.4s ease-out;
+  }
+
+  .animate-rank-change {
+    animation: rankSlide 0.5s ease-out;
+  }
+
+  .animate-pulse-gain {
+    animation: pulseGain 0.6s ease-out;
+  }
+
+  .animate-pulse-loss {
+    animation: pulseLoss 0.6s ease-out;
+  }
+}
+
+/* Sparkle / shimmer animation */
+@keyframes sparkle {
+
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes valueUp {
+  0% {
+    transform: translateY(4px);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes valueDown {
+  0% {
+    transform: translateY(-4px);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes rankSlide {
+  0% {
+    transform: translateY(-8px);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseGain {
+  0% {
+    background-color: hsl(var(--gain) / 0.3);
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes pulseLoss {
+  0% {
+    background-color: hsl(var(--loss) / 0.3);
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Custom scrollbar — new colors */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(40, 20%, 90%);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(15, 50%, 60%, 0.5);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(15, 60%, 55%, 0.7);
+}
+
+/* Number animations */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
