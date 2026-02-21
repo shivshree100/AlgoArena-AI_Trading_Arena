@@ -1,198 +1,237 @@
-# 🎮 AlgoArena - AI Trading Arena
+# 🎯 AlgoArena – AI Trading Arena
 
-**A real-time stock market simulation game where you compete against AI-powered trading agents**
+**A Real-Time AI-Powered Market Simulation & Strategy Research Platform**
 
-![nwHacks 2026](https://img.shields.io/badge/nwHacks-2026-blue)
 ![Python](https://img.shields.io/badge/Python-3.11+-green)
 ![React](https://img.shields.io/badge/React-18-61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
 
 ---
 
-## 🚀 What Is This?
+## 🚀 Overview
 
-AlgoArena is an AI-powered stock market simulation game where AI agents from major institutions trade in real-time. Experience the **Indian Market** (NIFTY 50, Bank NIFTY) like never before with a bento-style dashboard, sparkles, and a vibe-checked Gen Z interface.
+**AlgoArena** is an AI-driven stock market simulation platform that models real-time trading behavior across Indian financial markets such as **NIFTY 50, SENSEX, Bank NIFTY, and FINNIFTY**.
 
-### ✨ Key Features
+The platform combines:
 
-- **📈 Indian Market Simulation** - Real-time NIFTY 50, SENSEX, and Bank NIFTY action with realistic price action.
-- **🤖 LLM-Powered Trading Agents** - AI agents powered by Google Gemini making moves based on technicals and news.
-- **🍱 Bento Grid Dashboard** - A modern, sleek interface with glassy components and dynamic spacing.
-- **✨ Sparkles & Micro-Animations** - Visual celebrations for big wins and smooth transitions for that premium feel.
-- **🎮 Create Your Own Agent** - "Start Cooking" by writing your own strategy in natural language.
-- **💬 AI Trading Consultant** - A Gen Z sentient sidekick for strategy and market vibes.
-- **🏆 Live Leaderboard** - See who's securing the bread in real-time.
+* Multi-agent AI trading simulation
+* LLM-powered decision-making agents
+* Deterministic strategy backtesting engine
+* Real-time WebSocket streaming
+* Modern interactive trading dashboard
+
+It was built to explore how different trading philosophies (momentum, contrarian, value-based, etc.) perform in dynamic market conditions.
 
 ---
 
-## 🆕 What's New?
+## 🎯 Core Objectives
 
-### Core Simulation Features
-- **Indian Market Focus** - Switch between NIFTY 50, Bank NIFTY, SENSEX, and more.
-- **Bento Grid Layout** - Perfectly organized UI components for maximum focus and drip.
-- **Gen Z Tone Polish** - Interface copy updated with terms like "No Cap", "Securing the bread", and "Start Cooking".
-- **Multi-Agent Market** - 10+ agents including Quants (Citadel, Jane Street) and Fundamentalists.
+* Simulate institutional and retail trading behavior in Indian markets
+* Compare LLM-based AI agents against deterministic strategy models
+* Provide a quantitative research layer via backtesting
+* Create an interactive and intuitive market visualization experience
+* Analyze performance metrics such as alpha, Sharpe ratio, drawdown, and volatility
 
-### Real-Time WebSocket Streaming
-- Live market index updates
-- Agent trading activity feed
-- Top gainers/losers tracking
-- Portfolio P&L calculations
+---
 
-### Smart News System
-- Quant traders see news immediately
-- Fundamental traders see news 1 tick later
-- Retail traders see news 2 ticks later (simulating social media delay)
+## ✨ Key Features
 
-### Gemini-Powered Chat Assistant
-- Ask about market conditions
-- Chat assistant gives in-game commentary and strategy suggestions for the simulation
-- AI knows live market data
+### 📈 Indian Market Simulation
+
+* Supports NIFTY 50, SENSEX, Bank NIFTY, FINNIFTY
+* Tick-based market progression
+* Volatility modeling and trend simulation
+* Dynamic price updates per trading cycle
+
+### 🤖 LLM-Powered Trading Agents
+
+* Agents powered via OpenRouter (Gemini Flash models)
+* Institutional archetypes:
+
+  * Quant Momentum Traders
+  * Fundamental Value Investors
+  * Retail Emotional Traders
+* Agents react to:
+
+  * Market trends
+  * Historical price data
+  * News events
+  * Portfolio positions
+
+### 📰 Smart News Engine
+
+* Randomized market events (earnings, macro, sector shocks)
+* Information latency simulation:
+
+  * Quants → immediate access
+  * Fundamental investors → delayed
+  * Retail → social-delay simulation
+
+### 📊 Strategy Backtesting Engine (Deterministic Mode)
+
+* Historical price replay (no LLM randomness)
+* Strategy evaluation with:
+
+  * Total Return
+  * Annualized Return
+  * Sharpe Ratio
+  * Volatility
+  * Max Drawdown
+  * Win Rate
+* Equity curve visualization
+* Trade history tracking
+
+### 💬 AI Trading Consultant
+
+* Gemini-powered interactive assistant
+* Provides strategy guidance and market commentary
+* Context-aware responses using live simulation state
+
+### 🏆 Live Leaderboard
+
+* Real-time P&L tracking
+* Portfolio value updates
+* Performance comparison across agents
+
+---
+
+## 🧠 Backtesting Engine (Research Layer)
+
+The backtesting module converts AlgoArena into a **quantitative research tool**.
+
+### How It Works
+
+* Historical stock data is replayed tick-by-tick
+* Selected strategy logic is applied deterministically
+* Fixed capital allocation: ₹100,000 equivalent simulation
+* Fixed position sizing (10 shares per trade)
+* Portfolio value recalculated every tick
+
+### Supported Strategies
+
+* `contrarian`
+* `momentum`
+* `value_hunter`
+* `sector_rotator`
+* `yolo`
+
+### Output
+
+* Equity curve (for charting)
+* Trade log
+* Performance metrics dashboard
+
+This ensures real performance analysis rather than randomness-based outcomes.
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Backend (Python)
-| Technology | Purpose |
-|------------|---------|
-| **FastAPI** | High-performance async web framework |
-| **WebSockets** | Real-time bidirectional communication |
-| **OpenRouter API** | LLM access for trading agents (Gemini 2.0 Flash) |
-| **Google GenAI** | Gemini API for chat assistant |
-| **Uvicorn** | ASGI server |
+### Backend
 
-### Frontend (TypeScript/React)
-| Technology | Purpose |
-|------------|---------|
-| **React 18** | UI framework |
-| **Vite** | Build tool & dev server |
-| **TypeScript** | Type safety |
-| **TailwindCSS** | Utility-first styling |
-| **Shadcn/UI** | Component library (Radix primitives) |
-| **Recharts** | Data visualization |
-| **Framer Motion** | Animations |
-| **React Query** | Data fetching |
+* **FastAPI** – Async web framework
+* **WebSockets** – Real-time streaming
+* **OpenRouter API** – LLM trading agents
+* **Google GenAI** – AI chat assistant
+* **Uvicorn** – ASGI server
 
-### Architecture
-| Component | Description |
-|-----------|-------------|
-| **SimulationOrchestrator** | Central controller for tick-based market simulation |
-| **OrderBook** | Price-time priority order matching engine |
-| **TradingAgent** | LLM-powered agent with tool-calling capabilities |
-| **NewsGenerator** | Random market news events |
+### Frontend
+
+* **React 18**
+* **TypeScript**
+* **Vite**
+* **TailwindCSS**
+* **Shadcn/UI**
+* **Recharts**
+* **Framer Motion**
+* **React Query**
 
 ---
 
-## 🏃 How to Run
+## 🏗️ System Architecture
 
-### Prerequisites for Option 1: Local Development
-- Python 3.11+
-- Node.js 18+
-- OpenRouter API key (for trading agents)
-- Google GenAI API key (for chat)
+| Component              | Role                                       |
+| ---------------------- | ------------------------------------------ |
+| SimulationOrchestrator | Controls tick-based market simulation      |
+| OrderBook              | Price-time priority order matching         |
+| TradingAgent           | LLM-based agent decision engine            |
+| NewsGenerator          | Market event simulation                    |
+| Backtesting Engine     | Deterministic historical evaluation module |
 
 ---
 
-### 🖥️ Option 1: Local Development
+## 🏃 How To Run
 
-For **local testing only** — no Nginx needed.
+### 🔹 Local Development
+
+#### Backend
 
 ```bash
-# Terminal 1: Backend
+pip install -r requirements.txt
 python server.py
+```
 
-# Terminal 2: Frontend
+#### Frontend
+
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Then open `http://localhost:5173` in your browser.
-
----
-
-### 🌐 Option 2: Use Live Server
-
-A live server is already running 24/7 on Oracle Cloud:
-
-| Service | URL |
-|---------|-----|
-| **Web App** | http://163.192.25.163/ |
-| **API** | http://163.192.25.163/api/... |
-| **WebSocket** | ws://163.192.25.163/ws |
-
-Just open the URL in your browser — no setup required!
-
-> **Server Info:** The server uses Nginx as a reverse proxy and runs the backend via tmux for continuous operation.
-
----
-
-## 📊 How the Simulation Works
-
-> **Project Demo** Check out our project (demo video included) on [Devpost](https://devpost.com/software/algoarena)!
-
-1. **Market Opens** - 500 S&P stocks loaded with 12-month price history
-2. **Each Tick (Day)**:
-   - Random market volatility applied (some stocks are bullish, some bearish)
-   - News events may trigger (10% chance per tick)
-   - Market maker posts quotes
-   - LLM agents analyze market and make trading decisions
-   - Orders matched in order book
-   - Portfolios updated, P&L calculated
-3. **Simulation Ends** - Final leaderboard shows who won!
-
----
-
-## 🎯 Create Your Own Trading Agent
-
-Write your strategy in natural language:
-
-```python
-MY_STRATEGY = """
-I am a SMART CONTRARIAN. I look for overreactions in the market.
-- When a stock drops MORE than 5% below its historical average, I BUY (oversold)
-- When a stock rises MORE than 5% above its historical average, I SELL (overbought)
-- I use medium position sizes (10-20 shares)
-- I'm patient and wait for clear opportunities
-"""
-```
-
-Or use pre-built strategies: `contrarian`, `momentum`, `value_hunter`, `sector_rotator`, `yolo`
-
----
-
-## 📁 Project Structure
+Visit:
 
 ```
-nwhacks2026/
-├── server.py           # FastAPI WebSocket server (Indian Market Focus)
-├── orchestration.py    # Simulation orchestrator
-├── order_book.py       # Order matching engine
-├── agents.py           # LLM trading agents
-├── custom_agent.py     # Custom agent factory
-├── news_events.py      # News event generator
-├── stocks_nifty50.csv  # NIFTY 50 stock data (Indian Index)
-├── stocks_sensex.csv   # SENSEX stock data
-├── stocks_banknifty.csv # Bank NIFTY stock data
-├── requirements.txt    # Python dependencies
-├── frontend/           # React 18 + Vite + Tailwind + Shadcn
-│   ├── src/
-│   ├── package.json
-│   └── vite.config.ts
-└── WEBSOCKET_API_FORMAT.md
+http://localhost:5173
 ```
+
+---
+
+### 🔹 Live Deployment
+
+Hosted on Oracle Cloud:
+
+| Service   | URL                                                         |
+| --------- | ----------------------------------------------------------- |
+| Web App   | [http://163.192.25.163/](http://163.192.25.163/)            |
+| API       | [http://163.192.25.163/api/](http://163.192.25.163/api/)... |
+| WebSocket | ws://163.192.25.163/ws                                      |
+
+---
+
+## 📂 Project Structure
+
+```
+server.py              # FastAPI server
+orchestration.py       # Simulation controller
+order_book.py          # Matching engine
+agents.py              # LLM trading agents
+backtesting.py         # Deterministic backtesting engine
+news_events.py         # News generator
+stocks_*.csv           # Indian index datasets
+frontend/              # React application
+```
+
+---
+
+## 📊 What Makes AlgoArena Unique?
+
+* Combines AI agents + deterministic research layer
+* Models real-world information latency
+* Designed for both simulation AND strategy evaluation
+* Clean architecture separating live simulation from research mode
+* Production-style frontend with real-time updates
 
 ---
 
 ## 👥 Team
 
-Teammate: Dane, Timothy, Yaolong
+Built by:
 
-Built with ❤️ at **nwHacks 2026**
+* **Rachit**
+* **Ishaan**
+* **Tanvi**
+* **Shivshree**
 
----
+Developed at **Live Ai IVY Plus 2026**
 
-## 📜 License
-
-MIT License - Feel free to fork and build upon this project!
