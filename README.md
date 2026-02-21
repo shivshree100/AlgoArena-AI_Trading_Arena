@@ -11,27 +11,27 @@
 
 ## 🚀 What Is This?
 
-MarketMind is an AI-powered stock market simulation game built for **nwHacks 2026**. Watch AI agents from major financial institutions (Citadel, Jane Street, BlackRock, Vanguard) trade against each other in real-time, and create your own custom AI trading bot to compete!
+MarketMind is an AI-powered stock market simulation game where AI agents from major institutions trade in real-time. Experience the **Indian Market** (NIFTY 50, Bank NIFTY) like never before with a bento-style dashboard, sparkles, and a vibe-checked Gen Z interface.
 
 ### ✨ Key Features
 
-- **📈 Real-Time Market Simulation** - S&P 500 stocks with realistic price movements, volatility, and market trends
-- **🤖 LLM-Powered Trading Agents** - AI agents powered by Google Gemini that make trading decisions based on market data and news
-- **📰 Dynamic News Events** - Breaking news that affects stock prices (earnings beats, FDA approvals, analyst upgrades, etc.)
-- **🎮 Create Your Own Agent** - Write your own trading strategy in natural language and compete!
-- **💬 AI Trading Consultant** - Chat with a Gemini-powered assistant that knows live market data
-- **🏆 Live Leaderboard** - Track performance and see who's winning
+- **📈 Indian Market Simulation** - Real-time NIFTY 50, SENSEX, and Bank NIFTY action with realistic price action.
+- **🤖 LLM-Powered Trading Agents** - AI agents powered by Google Gemini making moves based on technicals and news.
+- **🍱 Bento Grid Dashboard** - A modern, sleek interface with glassy components and dynamic spacing.
+- **✨ Sparkles & Micro-Animations** - Visual celebrations for big wins and smooth transitions for that premium feel.
+- **🎮 Create Your Own Agent** - "Start Cooking" by writing your own strategy in natural language.
+- **💬 AI Trading Consultant** - A Gen Z sentient sidekick for strategy and market vibes.
+- **🏆 Live Leaderboard** - See who's securing the bread in real-time.
 
 ---
 
 ## 🆕 What's New?
 
 ### Core Simulation Features
-- **Multi-Agent Market** - 10+ trading agents with different personalities:
-  - **Quant Institutions** (Citadel, Jane Street) - Trade frequently, chase momentum
-  - **Fundamental Institutions** (BlackRock, Vanguard) - Patient value investors
-  - **Retail Traders** - Make emotional decisions, pay high fees
-  - **Custom Agent** - Your own AI trader!
+- **Indian Market Focus** - Switch between NIFTY 50, Bank NIFTY, SENSEX, and more.
+- **Bento Grid Layout** - Perfectly organized UI components for maximum focus and drip.
+- **Gen Z Tone Polish** - Interface copy updated with terms like "No Cap", "Securing the bread", and "Start Cooking".
+- **Multi-Agent Market** - 10+ agents including Quants (Citadel, Jane Street) and Fundamentalists.
 
 ### Real-Time WebSocket Streaming
 - Live market index updates
@@ -100,12 +100,10 @@ For **local testing only** — no Nginx needed.
 
 ```bash
 # Terminal 1: Backend
-cd nwhacks2026
-pip install -r requirements.txt
-python3 server.py
+python server.py
 
 # Terminal 2: Frontend
-cd nwhacks2026/frontend
+cd frontend
 npm install
 npm run dev
 ```
@@ -168,15 +166,17 @@ Or use pre-built strategies: `contrarian`, `momentum`, `value_hunter`, `sector_r
 
 ```
 nwhacks2026/
-├── server.py           # FastAPI WebSocket server
+├── server.py           # FastAPI WebSocket server (Indian Market Focus)
 ├── orchestration.py    # Simulation orchestrator
 ├── order_book.py       # Order matching engine
 ├── agents.py           # LLM trading agents
 ├── custom_agent.py     # Custom agent factory
 ├── news_events.py      # News event generator
-├── stocks_sp500.csv    # S&P 500 stock data
+├── stocks_nifty50.csv  # NIFTY 50 stock data (Indian Index)
+├── stocks_sensex.csv   # SENSEX stock data
+├── stocks_banknifty.csv # Bank NIFTY stock data
 ├── requirements.txt    # Python dependencies
-├── frontend/           # React frontend
+├── frontend/           # React 18 + Vite + Tailwind + Shadcn
 │   ├── src/
 │   ├── package.json
 │   └── vite.config.ts
