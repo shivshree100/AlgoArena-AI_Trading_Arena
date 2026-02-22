@@ -44,9 +44,14 @@ export function MarketSummary() {
           {regime}
         </div>
         <div className="text-xs text-muted-foreground mt-1">
-          NIFTY 50 {isPositive ? "+" : ""}
+          {index.label} {isPositive ? "+" : ""}
           {index.changePercent.toFixed(2)}%
         </div>
+        {state.dataFrom && state.dataTo && (
+          <div className="text-[10px] text-muted-foreground/50 mt-0.5 font-mono">
+            {state.dataFrom} → {state.dataTo}
+          </div>
+        )}
       </div>
 
       {/* Market Breadth */}

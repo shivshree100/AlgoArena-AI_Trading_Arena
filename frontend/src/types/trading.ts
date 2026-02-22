@@ -23,6 +23,10 @@ export interface TraderResult {
   isUser?: boolean;
   customPrompt?: string; // Custom AI strategy prompt
   capital?: number; // Starting capital for custom agents
+  dataSource?: 'csv' | 'yfinance'; // Data source selection
+  yfMarket?: string; // yfinance market type
+  yfPeriod?: string; // yfinance historical period
+  yfInterval?: string; // yfinance data interval
 }
 
 export interface TickData {
@@ -44,3 +48,46 @@ export interface MarketData {
 }
 
 export type SimulationSpeed = 'slow' | 'normal' | 'fast';
+
+// ============================================
+// PERSISTENT CUSTOM AGENTS
+// ============================================
+
+export interface SavedAgent {
+  id: string;
+  name: string;
+  prompt: string;
+  capital: number;
+  dataSource: 'csv' | 'yfinance';
+  marketType?: string;
+  yfMarket?: string;
+  yfPeriod?: string;
+  yfInterval?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface AgentDecision {
+  tick: number;
+  action: 'BUY' | 'SELL';
+  ticker: string;
+  size: number;
+  summary: string;
+  timestamp: number;
+}
+
+export interface SimulationRecord {
+  id: string;
+  agentId: string;
+  agentName: string;
+  timestamp: number;
+  rank: number;
+  totalAgents: number;
+  pnl: number;
+  pnlPct: number;
+  startValue: number;
+  finalValue: number;
+  marketLabel: string;
+  numTicks: number;
+  decisions: AgentDecision[];
+}

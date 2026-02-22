@@ -70,6 +70,32 @@ function parseWebSocketMessage(data: string, state: MarketStore, isRecursive: bo
       return events;
     }
 
+    // Handle simulation_starting to set market label and currency
+    if (message.type === 'simulation_starting') {
+      console.log('🚀 Simulation starting!', message);
+      // We dispatch SET_MARKET_INFO via a special event marker
+      // The hook will handle this outside the parser
+      (events as any).__marketInfo = {
+        marketLabel: message.market_label || 'Market Index',
+        currency: message.currency || '₹',
+        dataFrom: message.data_from || null,
+        dataTo: message.data_to || null,
+      };
+      return events;
+    }
+
+    // Handle market_info broadcast (sent from run_simulation_streaming after data loads)
+    if (message.type === 'market_info') {
+      console.log('📊 Market info received!', message);
+      (events as any).__marketInfo = {
+        marketLabel: message.market_label || 'Market Index',
+        currency: message.currency || '₹',
+        dataFrom: message.data_from || null,
+        dataTo: message.data_to || null,
+      };
+      return events;
+    }
+
     // ============================================
     // FILTER: Check for news event
     // Format: {"type": "news", "headline": "...", "stock": "AAPL", "sentiment": "positive"}
@@ -596,7 +622,12 @@ export function useMarketEventStream(
   }, [state, dispatch]);
 
   // Function to start simulation with custom agent config
-  const startSimulation = (customAgent?: CustomAgentConfig) => {
+  const startSimulation = (customAgent?: CustomAgentConfig & {
+    dataSource?: 'csv' | 'yfinance';
+    yfMarket?: string;
+    yfPeriod?: string;
+    yfInterval?: string;
+  }) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
       console.warn('WebSocket not connected, cannot start simulation');
       return false;
@@ -611,13 +642,28 @@ export function useMarketEventStream(
       command: "start_simulation",
       num_ticks: customAgent?.numTicks || 5,
       tick_delay: 1.0,
-      market_type: customAgent?.marketType || 'nifty50'
+      market_type: customAgent?.marketType || 'nifty50',
+      data_source: customAgent?.dataSource || 'csv',
     };
 
-    if (customAgent && customAgent.prompt) {
+    // Add yfinance parameters if using live data
+    if (customAgent?.dataSource === 'yfinance') {
+      startCommand.yf_market = customAgent.yfMarket || 'us_tech';
+      startCommand.yf_period = customAgent.yfPeriod || '3mo';
+      startCommand.yf_interval = customAgent.yfInterval || '1d';
+      console.log('🌐 Using LIVE DATA:', {
+        market: startCommand.yf_market,
+        period: startCommand.yf_period,
+        interval: startCommand.yf_interval
+      });
+    }
+
+    // Always send custom_agent config (name + capital), even if prompt is empty
+    // Backend uses default strategy when prompt is empty
+    if (customAgent) {
       startCommand.custom_agent = {
         name: customAgent.name,
-        prompt: customAgent.prompt,
+        prompt: customAgent.prompt || '',  // Empty string triggers default in backend
         capital: customAgent.capital || 100000
       };
       console.log('🎮 Starting with custom agent:', customAgent.name, 'Capital:', customAgent.capital);
@@ -689,9 +735,18 @@ export function useMarketEventStream(
                 }
                 dispatchRef.current({ type: 'APPLY_EVENT', event: marketEvent });
               });
-            } else {
+            }
+
+            // Handle market info from simulation_starting message
+            if ((events as any).__marketInfo) {
+              const { marketLabel, currency, dataFrom, dataTo } = (events as any).__marketInfo;
+              console.log('🌍 Setting market info:', { marketLabel, currency, dataFrom, dataTo });
+              dispatchRef.current({ type: 'SET_MARKET_INFO', marketLabel, currency, dataFrom, dataTo });
+            }
+
+            if (events.length === 0 && !(events as any).__marketInfo) {
               // Only warn if it's not a status message (connected, error, etc.)
-              if (parsedData && (parsedData.type === 'connected' || parsedData.type === 'error' || parsedData.type === 'status')) {
+              if (parsedData && (parsedData.type === 'connected' || parsedData.type === 'error' || parsedData.type === 'status' || parsedData.type === 'simulation_starting' || parsedData.type === 'market_info')) {
                 console.log('ℹ️ Status message (not an event):', parsedData);
               } else {
                 console.warn('⚠️ No events parsed from message');
