@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import BacktestPage from "./pages/BacktestPage";
+import ComparePage from "./pages/ComparePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Index onLogout={logout} />} />
               <Route path="/backtest" element={<BacktestPage />} />
+              <Route path="/compare" element={<ComparePage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

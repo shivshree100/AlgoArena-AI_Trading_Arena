@@ -3,7 +3,7 @@
 // Market-level abstraction with Index + Sectors
 // ============================================
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X } from 'lucide-react';
 import { Header } from '@/components/Header';
@@ -22,6 +22,7 @@ import { DashboardSparkles } from '@/components/DashboardSparkles';
 import { TraderResult } from '@/types/trading';
 import { useMarketStore } from '@/store/marketStore';
 import { useSimulationControls } from '@/store/MarketProvider';
+import { useCustomAgents } from '@/hooks/useCustomAgents';
 
 interface IndexProps {
   onLogout?: () => void;
@@ -35,6 +36,9 @@ const Index = ({ onLogout }: IndexProps) => {
 
   const { state, dispatch } = useMarketStore();
   const { isConnected, isSimulationStarted, startSimulation } = useSimulationControls();
+  const { savedAgents, addSimulationRecord } = useCustomAgents();
+  const activeAgentIdRef = useRef<string | null>(null);
+  const resultsSavedRef = useRef(false);
   // Session is complete when we receive simulation_complete from backend
   const isSessionComplete = state.simulationResults !== undefined;
 
@@ -44,6 +48,67 @@ const Index = ({ onLogout }: IndexProps) => {
       dispatch({ type: 'SIM_TOGGLE_PLAY' });
     }
   }, [isSessionComplete, state.simStatus.running, dispatch]);
+
+  // Auto-save simulation results when session completes
+  useEffect(() => {
+    if (!isSessionComplete || resultsSavedRef.current) return;
+    if (!state.simulationResults || !userTrader) return;
+
+    resultsSavedRef.current = true;
+
+    const leaderboard = state.simulationResults.leaderboard || [];
+    const userResult = leaderboard.find(
+      (r: any) => r.id === 'my_agent' || r.type === 'custom'
+    );
+    if (!userResult) return;
+
+    // Find matching saved agent by name
+    const matchingAgent = savedAgents.find(
+      a => a.name.toLowerCase() === userTrader.name.toLowerCase()
+    );
+
+    // Extract decisions from agent activities for the user's agent
+    const agentNameUpper = userTrader.name.toUpperCase();
+    const decisions = state.agentActivities
+      .filter(a => {
+        const summary = (a.summary || '').toUpperCase();
+        return summary.includes(agentNameUpper) || summary.includes('🎮');
+      })
+      .filter(a => {
+        const summary = (a.summary || '').toUpperCase();
+        return summary.includes('BUYS') || summary.includes('SELLS');
+      })
+      .map(a => {
+        const summary = a.summary || '';
+        const isBuy = summary.toUpperCase().includes('BUYS');
+        const tickerMatch = summary.match(/(?:BUYS|SELLS)\s+(\d+)\s+([A-Z][A-Z0-9.]+)/i);
+        return {
+          tick: state.simStatus.tickCount,
+          action: isBuy ? 'BUY' as const : 'SELL' as const,
+          ticker: tickerMatch ? tickerMatch[2] : '?',
+          size: tickerMatch ? parseInt(tickerMatch[1]) : 0,
+          summary: summary,
+          timestamp: a.timestamp,
+        };
+      });
+
+    addSimulationRecord({
+      agentId: matchingAgent?.id || `unsaved-${Date.now()}`,
+      agentName: userTrader.name,
+      timestamp: Date.now(),
+      rank: userResult.rank,
+      totalAgents: leaderboard.length,
+      pnl: userResult.pnl,
+      pnlPct: userResult.pnl_pct,
+      startValue: userResult.start_value,
+      finalValue: userResult.final_value,
+      marketLabel: state.marketLabel || 'Market',
+      numTicks: state.simStatus.maxTicks,
+      decisions,
+    });
+
+    console.log('💾 Auto-saved simulation record for', userTrader.name);
+  }, [isSessionComplete, state.simulationResults, userTrader, savedAgents, state.agentActivities, addSimulationRecord, state.simStatus, state.marketLabel]);
 
   const handleJumpIn = () => {
     setIsProfileOpen(true);
@@ -60,6 +125,7 @@ const Index = ({ onLogout }: IndexProps) => {
   const handleRestart = () => {
     dispatch({ type: 'SIM_RESET' });
     setIsAnalysisOpen(false);
+    resultsSavedRef.current = false;
   };
 
   const handleProfileSubmit = (trader: Omit<TraderResult, 'rank' | 'previousRank' | 'currentPnL' | 'previousPnL'>, days?: number, marketType?: string) => {
@@ -82,6 +148,10 @@ const Index = ({ onLogout }: IndexProps) => {
       capital: trader.capital || 100000,
       numTicks: days || 5,
       marketType: marketType || 'nifty50',
+      dataSource: trader.dataSource || 'csv',
+      yfMarket: trader.yfMarket,
+      yfPeriod: trader.yfPeriod,
+      yfInterval: trader.yfInterval,
     });
   };
 

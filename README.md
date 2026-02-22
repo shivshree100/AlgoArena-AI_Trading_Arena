@@ -36,7 +36,17 @@ It was built to explore how different trading philosophies (momentum, contrarian
 
 ## ✨ Key Features
 
-### 📈 Indian Market Simulation
+### 📈 Market Data Options
+
+* **Simulated Data**: CSV-based Indian market data (NIFTY 50, SENSEX, Bank NIFTY, FINNIFTY)
+* **Live Data**: Real-time and historical data via yfinance API
+  * US stocks (Tech, S&P 500)
+  * Indian stocks (NIFTY 50)
+  * Cryptocurrencies
+  * Custom ticker lists
+  * Flexible time periods (1 month to 10+ years)
+
+### 📊 Indian Market Simulation
 
 * Supports NIFTY 50, SENSEX, Bank NIFTY, FINNIFTY
 * Tick-based market progression
@@ -185,7 +195,42 @@ Visit:
 http://localhost:5173
 ```
 
----
+### 🔹 Using Live Data
+
+The platform now supports real-time stock data via yfinance:
+
+```bash
+# Test live data fetching
+python test_live_data.py
+
+# See full documentation
+cat LIVE_DATA_GUIDE.md
+```
+
+**Quick Example:**
+```python
+from market_data import fetch_market_data
+
+# Fetch US tech stocks with 3 months of data
+stocks = fetch_market_data(market='us_tech', period='3mo', interval='1d')
+```
+
+**Available Markets:**
+- `us_tech` - US Tech Giants (AAPL, MSFT, GOOGL, etc.)
+- `us_sp500_sample` - S&P 500 Sample
+- `india_nifty50` - Indian NIFTY 50
+- `crypto` - Cryptocurrencies (BTC, ETH, etc.)
+
+**WebSocket Usage:**
+```javascript
+{
+  "command": "start_simulation",
+  "data_source": "yfinance",  // or "csv" for simulated data
+  "yf_market": "us_tech",
+  "yf_period": "3mo",
+  "yf_interval": "1d"
+}
+```
 
 ### 🔹 Live Deployment
 

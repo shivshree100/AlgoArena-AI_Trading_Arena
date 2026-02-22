@@ -190,6 +190,12 @@ export interface MarketStore {
     leaderboard: AgentResult[];
     analysisReport?: string;
   };
+
+  // Dynamic market info (set when simulation starts)
+  marketLabel: string;   // e.g. 'NIFTY 50', 'US Tech', 'S&P 500'
+  currency: string;      // e.g. '₹', '$'
+  dataFrom?: string;     // e.g. 'Nov 21, 2025' - start of yfinance data range
+  dataTo?: string;       // e.g. 'Feb 20, 2026' - end of yfinance data range
 }
 
 // ============================================
@@ -205,4 +211,5 @@ export type MarketAction =
   | { type: 'SIM_RESET' }
   | { type: 'SIM_SEEK'; tick: number }
   | { type: 'SUBSCRIBE'; instrumentId: string }
-  | { type: 'UNSUBSCRIBE'; instrumentId: string };
+  | { type: 'UNSUBSCRIBE'; instrumentId: string }
+  | { type: 'SET_MARKET_INFO'; marketLabel: string; currency: string; dataFrom?: string; dataTo?: string };

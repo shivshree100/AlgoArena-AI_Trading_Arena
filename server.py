@@ -14,6 +14,7 @@ from orchestration import SimulationOrchestrator, Side
 from order_book import create_order_books
 from agents import create_agent, DumbRetailHolder, DumbRetailDaytrader
 from news_events import NewsGenerator
+from market_data import fetch_market_data, MarketDataProvider, MARKET_TICKERS
 
 # Try to import custom agent, but don't fail if it has issues
 try:
@@ -76,6 +77,44 @@ def load_stocks(csv_path="stocks_nifty.csv"):
     return stocks
 
 
+def load_stocks_from_yfinance(
+    market: str = 'us_tech',
+    custom_tickers: Optional[List[str]] = None,
+    period: str = '3mo',
+    interval: str = '1d'
+):
+    """
+    Load stocks from yfinance API with real historical data.
+    
+    Args:
+        market: Predefined market ('us_tech', 'us_sp500_sample', 'india_nifty50', 'crypto')
+        custom_tickers: Optional list of custom ticker symbols
+        period: Historical period (1mo, 3mo, 6mo, 1y, 2y, etc.)
+        interval: Data interval (1d, 1wk, 1mo)
+    
+    Returns:
+        List of stock dicts with format: {ticker, name, sector, history, current_price}
+    """
+    print(f"\n📡 Fetching live data from yfinance...")
+    print(f"   Market: {market}")
+    print(f"   Period: {period}, Interval: {interval}")
+    
+    stocks = fetch_market_data(
+        market=market,
+        custom_tickers=custom_tickers,
+        period=period,
+        interval=interval,
+        include_info=True
+    )
+    
+    if not stocks:
+        print("   ⚠️ No data fetched, falling back to CSV data")
+        return load_stocks()
+    
+    print(f"   ✅ Successfully loaded {len(stocks)} stocks from yfinance")
+    return stocks
+
+
 def calculate_market_index(initial_prices: dict, current_prices: dict) -> float:
     """
     Calculate price-weighted market index (like Dow Jones).
@@ -114,7 +153,12 @@ async def run_simulation_streaming(
     num_ticks: int = 5, 
     tick_delay: float = 1.0,
     custom_agent_config: dict = None,
-    market_type: str = "nifty50"
+    market_type: str = "nifty50",
+    data_source: str = "csv",
+    yf_market: str = "us_tech",
+    yf_tickers: Optional[List[str]] = None,
+    yf_period: str = "3mo",
+    yf_interval: str = "1d"
 ):
     """Run simulation and stream each tick to connected clients.
     
@@ -125,28 +169,95 @@ async def run_simulation_streaming(
             - name: Display name for the agent
             - prompt: Custom system prompt for trading strategy
             - capital: Starting capital (default: 100000)
+        market_type: Market index CSV to use (for csv data source)
+        data_source: Data source - "csv" for simulated data or "yfinance" for live data
+        yf_market: yfinance market type (us_tech, india_nifty50, etc.)
+        yf_tickers: Custom ticker list for yfinance
+        yf_period: Historical period for yfinance (1mo, 3mo, 6mo, 1y, etc.)
+        yf_interval: Data interval for yfinance (1d, 1wk, 1mo)
     """
     global current_market_state
     
-    # Load stocks based on market type
-    market_config = {
-        "nifty50": {"file": "stocks_nifty50.csv", "label": "NIFTY 50"},
-        "banknifty": {"file": "stocks_banknifty.csv", "label": "Bank NIFTY"},
-        "sensex": {"file": "stocks_sensex.csv", "label": "SENSEX"},
-        "finnifty": {"file": "stocks_finnifty.csv", "label": "Fin NIFTY"},
-        "bankex": {"file": "stocks_bankex.csv", "label": "BANKEX"}
+    # Load stocks based on data source
+    # Determine currency symbol based on market
+    def get_currency_for_market(ds, yf_mkt, mkt_type):
+        if ds == "yfinance":
+            if yf_mkt in ('india_nifty50',):
+                return '₹'
+            elif yf_mkt in ('crypto',):
+                return '$'  # crypto is USD-denominated
+            else:
+                return '$'  # US markets
+        else:
+            return '₹'  # CSV data is Indian markets
+    
+    currency = get_currency_for_market(data_source, yf_market, market_type)
+    
+    # yfinance market label mapping
+    yf_market_labels = {
+        'us_tech': 'US Tech',
+        'us_sp500_sample': 'S&P 500',
+        'india_nifty50': 'NIFTY 50',
+        'crypto': 'Crypto',
     }
     
-    config = market_config.get(market_type, market_config["nifty50"])
-    csv_file = config["file"]
-    market_label = config["label"]
+    if data_source == "yfinance":
+        print(f"\n🌐 Using LIVE DATA from yfinance")
+        stock_data = load_stocks_from_yfinance(
+            market=yf_market,
+            custom_tickers=yf_tickers,
+            period=yf_period,
+            interval=yf_interval
+        )
+        market_label = yf_market_labels.get(yf_market, yf_market.upper()) if not yf_tickers else "Custom Tickers"
+    else:
+        # Load stocks based on market type from CSV
+        market_config = {
+            "nifty50": {"file": "stocks_nifty50.csv", "label": "NIFTY 50"},
+            "banknifty": {"file": "stocks_banknifty.csv", "label": "Bank NIFTY"},
+            "sensex": {"file": "stocks_sensex.csv", "label": "SENSEX"},
+            "finnifty": {"file": "stocks_finnifty.csv", "label": "Fin NIFTY"},
+            "bankex": {"file": "stocks_bankex.csv", "label": "BANKEX"}
+        }
+        
+        config = market_config.get(market_type, market_config["nifty50"])
+        csv_file = config["file"]
+        market_label = config["label"]
+        
+        print(f"\n📊 Using SIMULATED DATA from CSV")
+        stock_data = load_stocks(csv_file)
     
-    stock_data = load_stocks(csv_file)
     tickers = [s["ticker"] for s in stock_data]
     initial_prices = {s["ticker"]: s["current_price"] for s in stock_data}
     stock_history = {s["ticker"]: s["history"] for s in stock_data}
     stock_names = {s["ticker"]: s["name"] for s in stock_data}
-    print(f"\n🏛️ Market: {market_label} ({len(tickers)} stocks from {csv_file})")
+    print(f"\n🏛️ Market: {market_label} ({len(tickers)} stocks)")
+    
+    # Determine date range for the data and broadcast market info
+    data_from = None
+    data_to = None
+    if data_source == "yfinance" and tickers:
+        try:
+            import yfinance as yf
+            sample = yf.Ticker(tickers[0])
+            sample_data = sample.history(period=yf_period, interval=yf_interval)
+            if not sample_data.empty:
+                data_from = sample_data.index[0].strftime("%b %d, %Y")
+                data_to = sample_data.index[-1].strftime("%b %d, %Y")
+                print(f"   Period: {yf_period}, Interval: {yf_interval}")
+                print(f"   📅 Data range: {data_from} → {data_to}")
+        except Exception as e:
+            print(f"   ⚠️ Could not determine date range: {e}")
+    
+    # Broadcast market info to all clients (label, currency, date range)
+    await broadcast({
+        "type": "market_info",
+        "market_label": market_label,
+        "currency": currency,
+        "data_source": data_source,
+        "data_from": data_from,
+        "data_to": data_to,
+    })
     
     # Setup orchestrator
     orchestrator = SimulationOrchestrator()
@@ -660,31 +771,31 @@ GOAL: Hold top 3 momentum stocks with 65 shares each. Maximize capital deploymen
         report_lines.append("")
         
         if winner:
-            report_lines.append(f"**Winner:** {winner['name']} finished #{winner['rank']} with {winner['pnl_pct']:+.2f}% return (₹{winner['pnl']:+,.2f} profit). Strategy type: {winner['type']}.")
+            report_lines.append(f"**Winner:** {winner['name']} finished #{winner['rank']} with {winner['pnl_pct']:+.2f}% return ({currency}{winner['pnl']:+,.2f} profit). Strategy type: {winner['type']}.")
         if loser:
-            report_lines.append(f"**Last Place:** {loser['name']} finished #{loser['rank']} with {loser['pnl_pct']:+.2f}% return (₹{loser['pnl']:+,.2f}).")
+            report_lines.append(f"**Last Place:** {loser['name']} finished #{loser['rank']} with {loser['pnl_pct']:+.2f}% return ({currency}{loser['pnl']:+,.2f}).")
         report_lines.append("")
         
         # Full rankings
         report_lines.append("## Full Rankings")
         for r in final_results:
             marker = " ⭐ (YOUR BOT)" if r['id'] == 'my_agent' else ""
-            report_lines.append(f"#{r['rank']} **{r['name']}** — {r['pnl_pct']:+.2f}% (₹{r['pnl']:+,.2f}){marker}")
+            report_lines.append(f"#{r['rank']} **{r['name']}** — {r['pnl_pct']:+.2f}% ({currency}{r['pnl']:+,.2f}){marker}")
         report_lines.append("")
         
         if user_result:
             report_lines.append("## Your Bot's Performance")
             report_lines.append(f"**{user_result['name']}** finished **#{user_result['rank']}** out of {len(final_results)} agents.")
             report_lines.append(f"- Return: **{user_result['pnl_pct']:+.2f}%**")
-            report_lines.append(f"- Profit/Loss: **₹{user_result['pnl']:+,.2f}**")
-            report_lines.append(f"- Starting Value: ₹{user_result['start_value']:,.2f}")
-            report_lines.append(f"- Final Value: ₹{user_result['final_value']:,.2f}")
-            report_lines.append(f"- Cash Remaining: ₹{user_result.get('cash', 0):,.2f}")
+            report_lines.append(f"- Profit/Loss: **{currency}{user_result['pnl']:+,.2f}**")
+            report_lines.append(f"- Starting Value: {currency}{user_result['start_value']:,.2f}")
+            report_lines.append(f"- Final Value: {currency}{user_result['final_value']:,.2f}")
+            report_lines.append(f"- Cash Remaining: {currency}{user_result.get('cash', 0):,.2f}")
             
             positions = user_result.get('positions', [])
             if positions:
                 report_lines.append(f"- Stocks Held: {len(positions)}")
-                top_holdings = ", ".join(f"{p.get('name', p['ticker'])} (x{p['quantity']}, ₹{p['value']:,.0f})" for p in positions[:5])
+                top_holdings = ", ".join(f"{p.get('name', p['ticker'])} (x{p['quantity']}, {currency}{p['value']:,.0f})" for p in positions[:5])
                 report_lines.append(f"- Top Holdings: {top_holdings}")
             else:
                 report_lines.append("- Stocks Held: 0 (all cash)")
@@ -693,13 +804,13 @@ GOAL: Hold top 3 momentum stocks with 65 shares each. Maximize capital deploymen
             # What went right/wrong
             report_lines.append("## What Happened")
             if user_result['pnl'] > 0:
-                report_lines.append(f"Your bot made a profit of ₹{user_result['pnl']:+,.2f}! It outperformed {len(final_results) - user_result['rank']} other agents.")
+                report_lines.append(f"Your bot made a profit of {currency}{user_result['pnl']:+,.2f}! It outperformed {len(final_results) - user_result['rank']} other agents.")
                 if user_result['rank'] <= 3:
                     report_lines.append("Excellent performance — your strategy was among the top performers!")
                 else:
                     report_lines.append("Good result, but there's room for improvement in timing and position sizing.")
             else:
-                report_lines.append(f"Your bot lost ₹{abs(user_result['pnl']):,.2f}. Here's what likely went wrong:")
+                report_lines.append(f"Your bot lost {currency}{abs(user_result['pnl']):,.2f}. Here's what likely went wrong:")
                 if market_index < 100:
                     report_lines.append("- The overall market was bearish, making it hard for any strategy to profit.")
                     report_lines.append("- Consider adding a 'stay in cash when market is falling' rule to your prompt.")
@@ -773,18 +884,65 @@ async def websocket_endpoint(websocket: WebSocket):
                     custom_agent_config = data.get("custom_agent")
                     # custom_agent format: {"name": "My Bot", "prompt": "I am a momentum trader..."}
                     
-                    # Extract market type
+                    # Extract market type (for CSV data)
                     market_type = data.get("market_type", "nifty50")
+                    
+                    # Extract data source and yfinance parameters
+                    data_source = data.get("data_source", "csv")  # "csv" or "yfinance"
+                    yf_market = data.get("yf_market", "us_tech")
+                    yf_tickers = data.get("yf_tickers")  # Optional custom tickers
+                    yf_period = data.get("yf_period", "3mo")
+                    yf_interval = data.get("yf_interval", "1d")
                     
                     if simulation_task is None or simulation_task.done():
                         simulation_task = asyncio.create_task(
-                            run_simulation_streaming(num_ticks, tick_delay, custom_agent_config, market_type)
+                            run_simulation_streaming(
+                                num_ticks, tick_delay, custom_agent_config, market_type,
+                                data_source, yf_market, yf_tickers, yf_period, yf_interval
+                            )
                         )
-                        await websocket.send_json({
+                        # Determine market label and currency for frontend
+                        yf_labels = {'us_tech': 'US Tech', 'us_sp500_sample': 'S&P 500', 'india_nifty50': 'NIFTY 50', 'crypto': 'Crypto'}
+                        csv_labels = {'nifty50': 'NIFTY 50', 'banknifty': 'Bank NIFTY', 'sensex': 'SENSEX', 'finnifty': 'Fin NIFTY', 'bankex': 'BANKEX'}
+                        if data_source == 'yfinance':
+                            sim_market_label = yf_labels.get(yf_market, yf_market.upper())
+                            sim_currency = '₹' if yf_market == 'india_nifty50' else '$'
+                        else:
+                            sim_market_label = csv_labels.get(market_type, 'NIFTY 50')
+                            sim_currency = '₹'
+                        
+                        # Determine date range for yfinance data
+                        sim_data_from = None
+                        sim_data_to = None
+                        if data_source == 'yfinance':
+                            try:
+                                import yfinance as yf_check
+                                # Quick fetch on first available ticker to get dates
+                                yf_tickers_list = yf_tickers or []
+                                if not yf_tickers_list:
+                                    from market_data import MARKET_TICKERS
+                                    yf_tickers_list = MARKET_TICKERS.get(yf_market, ['AAPL'])
+                                sample = yf_check.Ticker(yf_tickers_list[0])
+                                sample_hist = sample.history(period=yf_period, interval=yf_interval)
+                                if not sample_hist.empty:
+                                    sim_data_from = sample_hist.index[0].strftime('%b %d, %Y')
+                                    sim_data_to = sample_hist.index[-1].strftime('%b %d, %Y')
+                            except Exception as e:
+                                print(f"⚠️ Could not determine date range: {e}")
+                        
+                        sim_starting_msg = {
                             "type": "simulation_starting",
                             "num_ticks": num_ticks,
+                            "data_source": data_source,
+                            "market": yf_market if data_source == "yfinance" else market_type,
+                            "market_label": sim_market_label,
+                            "currency": sim_currency,
+                            "data_from": sim_data_from,
+                            "data_to": sim_data_to,
                             "custom_agent": custom_agent_config.get("name") if custom_agent_config else None
-                        })
+                        }
+                        print(f"📤 Sending simulation_starting: data_from={sim_data_from}, data_to={sim_data_to}")
+                        await websocket.send_json(sim_starting_msg)
                     else:
                         await websocket.send_json({
                             "type": "error",
@@ -862,6 +1020,80 @@ async def run_backtest_endpoint(request: BacktestRequest):
 async def list_strategies():
     """Return available strategy names."""
     return {"strategies": list(STRATEGIES.keys())}
+
+
+# ============================================
+# LIVE DATA API ENDPOINTS
+# ============================================
+
+class LiveDataRequest(BaseModel):
+    market: str = "us_tech"
+    custom_tickers: Optional[List[str]] = None
+    period: str = "3mo"
+    interval: str = "1d"
+
+@app.get("/api/markets/available")
+async def get_available_markets():
+    """Get list of available predefined markets for live data."""
+    return {
+        "markets": list(MARKET_TICKERS.keys()),
+        "market_details": {
+            "us_tech": {"name": "US Tech Giants", "count": len(MARKET_TICKERS["us_tech"])},
+            "us_sp500_sample": {"name": "S&P 500 Sample", "count": len(MARKET_TICKERS["us_sp500_sample"])},
+            "india_nifty50": {"name": "India NIFTY 50", "count": len(MARKET_TICKERS["india_nifty50"])},
+            "crypto": {"name": "Cryptocurrencies", "count": len(MARKET_TICKERS["crypto"])}
+        }
+    }
+
+@app.post("/api/markets/preview")
+async def preview_market_data(request: LiveDataRequest):
+    """Preview market data without starting simulation."""
+    try:
+        stocks = await asyncio.to_thread(
+            fetch_market_data,
+            market=request.market,
+            custom_tickers=request.custom_tickers,
+            period=request.period,
+            interval=request.interval,
+            include_info=True
+        )
+        
+        # Return summary
+        summary = []
+        for stock in stocks[:20]:  # Limit to first 20 for preview
+            summary.append({
+                "ticker": stock["ticker"],
+                "name": stock["name"],
+                "sector": stock["sector"],
+                "current_price": stock["current_price"],
+                "data_points": len(stock["history"])
+            })
+        
+        return {
+            "success": True,
+            "total_stocks": len(stocks),
+            "preview": summary,
+            "period": request.period,
+            "interval": request.interval
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/api/markets/ticker/{ticker}")
+async def get_ticker_info(ticker: str):
+    """Get detailed information about a specific ticker."""
+    try:
+        provider = MarketDataProvider()
+        info = await asyncio.to_thread(provider.get_stock_info, ticker)
+        current_price = await asyncio.to_thread(provider.fetch_current_price, ticker)
+        
+        if info:
+            info["current_price"] = current_price
+            return {"success": True, "data": info}
+        else:
+            return {"success": False, "error": "Ticker not found"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 # ============================================

@@ -23,11 +23,11 @@ function generateInitialInstruments(): Record<string, MarketInstrument> {
   const instruments: Record<string, MarketInstrument> = {};
   const STARTING_PRICE = 100;
 
-  // NIFTY 50 Index - start at 100, will be updated by WebSocket
+  // Market Index - start at 100, will be updated by WebSocket
   instruments['SP500'] = {
     id: 'SP500',
     kind: 'index',
-    label: 'NIFTY 50',
+    label: 'Market Index',
     price: STARTING_PRICE,
     previousPrice: STARTING_PRICE,
     changePercent: 0,
@@ -83,6 +83,8 @@ export function createInitialState(): MarketStore {
       losers: [],
     },
     subscribedInstruments,
+    marketLabel: 'Market Index',
+    currency: '₹',
   };
 }
 
@@ -322,6 +324,25 @@ export function marketReducer(state: MarketStore, action: MarketAction): MarketS
       return {
         ...state,
         subscribedInstruments: newSet,
+      };
+    }
+
+    case 'SET_MARKET_INFO': {
+      // Update the market label and currency, and also update the index instrument label
+      const updatedInstruments = { ...state.instruments };
+      if (updatedInstruments['SP500']) {
+        updatedInstruments['SP500'] = {
+          ...updatedInstruments['SP500'],
+          label: action.marketLabel,
+        };
+      }
+      return {
+        ...state,
+        instruments: updatedInstruments,
+        marketLabel: action.marketLabel,
+        currency: action.currency,
+        dataFrom: action.dataFrom,
+        dataTo: action.dataTo,
       };
     }
 

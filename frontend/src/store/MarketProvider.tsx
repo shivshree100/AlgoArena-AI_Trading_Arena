@@ -19,7 +19,7 @@ interface MarketProviderProps {
 interface SimulationControlsContextValue {
   isConnected: boolean;
   isSimulationStarted: boolean;
-  startSimulation: (customAgent?: { name: string; prompt: string; capital?: number; numTicks?: number }) => boolean;
+  startSimulation: (customAgent?: { name: string; prompt: string; capital?: number; numTicks?: number; marketType?: string; dataSource?: 'csv' | 'yfinance'; yfMarket?: string; yfPeriod?: string; yfInterval?: string }) => boolean;
 }
 
 const SimulationControlsContext = createContext<SimulationControlsContextValue | null>(null);

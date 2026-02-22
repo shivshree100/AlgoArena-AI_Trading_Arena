@@ -68,7 +68,7 @@ function IndexRow({ instrument, isActive, onClick }: IndexRowProps) {
     >
       <div className="flex items-center gap-2 min-w-0">
         <div className="w-2 h-2 rounded-full bg-primary animate-pulse flex-shrink-0" />
-        <span className="font-semibold text-primary whitespace-nowrap">NIFTY 50</span>
+        <span className="font-semibold text-primary whitespace-nowrap">{instrument.label}</span>
       </div>
 
       <motion.span
@@ -100,9 +100,10 @@ function IndexRow({ instrument, isActive, onClick }: IndexRowProps) {
 interface StockMoverRowProps {
   mover: StockMover;
   rank: number;
+  currency: string;
 }
 
-function StockMoverRow({ mover, rank }: StockMoverRowProps) {
+function StockMoverRow({ mover, rank, currency }: StockMoverRowProps) {
   const isPositive = mover.change >= 0;
 
   return (
@@ -125,7 +126,7 @@ function StockMoverRow({ mover, rank }: StockMoverRowProps) {
 
       {/* Price */}
       <span className="font-mono text-sm text-right tabular-nums text-muted-foreground">
-        ₹{mover.price.toFixed(2)}
+        {currency}{mover.price.toFixed(2)}
       </span>
 
       {/* Change % */}
@@ -171,8 +172,13 @@ export function MarketBoard() {
           The Main Board
         </h2>
         <p className="text-xs text-muted-foreground/70 mt-0.5">
-          NIFTY 50 Vibes & Top Movers
+          {index?.label || 'Market'} Vibes & Top Movers
         </p>
+        {state.dataFrom && state.dataTo && (
+          <p className="text-[10px] text-primary/60 mt-0.5 font-mono">
+            📅 {state.dataFrom} → {state.dataTo}
+          </p>
+        )}
       </div>
 
       {/* Column Headers */}
@@ -185,7 +191,7 @@ export function MarketBoard() {
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto py-2">
-        {/* NIFTY 50 Index (always first) */}
+        {/* Market Index (always first) */}
         {index && (
           <div className="px-1">
             <IndexRow
@@ -206,7 +212,7 @@ export function MarketBoard() {
           </div>
           {topMovers.gainers.length > 0 ? (
             topMovers.gainers.map((mover, i) => (
-              <StockMoverRow key={mover.ticker} mover={mover} rank={i + 1} />
+              <StockMoverRow key={mover.ticker} mover={mover} rank={i + 1} currency={state.currency} />
             ))
           ) : (
             <EmptyMovers type="gainers" />
@@ -226,7 +232,7 @@ export function MarketBoard() {
           </div>
           {topMovers.losers.length > 0 ? (
             topMovers.losers.map((mover, i) => (
-              <StockMoverRow key={mover.ticker} mover={mover} rank={i + 1} />
+              <StockMoverRow key={mover.ticker} mover={mover} rank={i + 1} currency={state.currency} />
             ))
           ) : (
             <EmptyMovers type="losers" />

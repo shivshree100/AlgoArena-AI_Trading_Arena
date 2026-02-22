@@ -1,4 +1,4 @@
-import { Zap, LogOut, Activity } from 'lucide-react';
+import { Zap, LogOut, Activity, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '@/assets/logo.png';
@@ -49,6 +49,16 @@ export function Header({ onLogout }: HeaderProps) {
             >
               <Activity className="w-3.5 h-3.5" />
               Backtest
+            </button>
+            <button
+              onClick={() => navigate('/compare')}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${location.pathname === '/compare'
+                ? 'bg-violet-500/15 text-violet-300'
+                : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              Compare
             </button>
           </nav>
 
